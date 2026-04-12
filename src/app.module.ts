@@ -4,7 +4,7 @@ import { AppService } from "./app.service";
 import { AppController } from "./app.controller";
 import { AuthModule } from "./routes/auth/auth.module";
 import { HealthModule } from "./routes/health/health.module";
-import { HttpExceptionFilter } from "./common/filters/http-exception-filter";
+import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 
 @Module({
   providers: [
