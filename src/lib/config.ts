@@ -15,7 +15,7 @@ if (!_env.success) {
   );
   throw new Error("Invalid environment variables");
 }
-
+ 
 export const config = {
   port: _env.data.PORT,
 };
