@@ -1,10 +1,13 @@
-import { Module, ValidationPipe } from "@nestjs/common";
-import { APP_FILTER, APP_PIPE } from "@nestjs/core";
 import { AppService } from "./app.service";
+import { ConfigModule } from "@nestjs/config";
 import { AppController } from "./app.controller";
-import { AuthModule } from "./routes/auth/auth.module";
-import { HealthModule } from "./routes/health/health.module";
-import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
+import { APP_FILTER, APP_PIPE } from "@nestjs/core";
+import { AuthModule } from "./modules/auth/auth.module";
+import { Module, ValidationPipe } from "@nestjs/common";
+import configuration from "@common/config/main.config";
+import { HealthModule } from "./modules/health/health.module";
+import { LeadsModule } from "./modules/core/leads/leads.module";
+import { HttpExceptionFilter } from "./common/filters/http-exception-filter";
 
 @Module({
   providers: [
@@ -19,6 +22,15 @@ import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
     },
   ],
   controllers: [AppController],
-  imports: [AuthModule, HealthModule, AuthModule],
+  imports: [
+    AuthModule,
+    HealthModule,
+    AuthModule,
+    LeadsModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [configuration],
+    }),
+  ],
 })
 export class AppModule {}
