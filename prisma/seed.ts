@@ -3,8 +3,6 @@ import * as bcrypt from 'bcrypt';
 import { faker } from '@faker-js/faker';
 import { PrismaPg } from '@prisma/adapter-pg';
 import {
-    Day,
-    Month,
     Prisma,
     UserRole,
     PrismaClient,
@@ -38,9 +36,6 @@ function buildUser(overrides: Partial<Prisma.UserCreateInput>) {
         role: UserRole.USER,
         status: faker.helpers.enumValue(UserAccountStatus),
         lastActive: faker.date.recent(),
-        month: faker.helpers.enumValue(Month),
-        day: faker.helpers.enumValue(Day),
-        year: faker.number.int({ min: 2020, max: 2025 }),
         ...overrides,
     } satisfies Prisma.UserCreateInput;
 }

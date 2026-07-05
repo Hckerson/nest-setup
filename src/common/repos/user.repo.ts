@@ -71,7 +71,7 @@ export class UserRepo {
         }
     }
 
-    async createMany(params: Prisma.UserCreateManyArgs) {
+    async createMany(params: Prisma.UserCreateManyArgs): Promise<Prisma.BatchPayload> {
         try {
             return await this.prisma.user.createMany(params);
         } catch (error) {
@@ -99,7 +99,7 @@ export class UserRepo {
         }
     }
 
-    async updateMany(params: Prisma.UserUpdateManyArgs) {
+    async updateMany(params: Prisma.UserUpdateManyArgs): Promise<Prisma.BatchPayload> {
         try {
             return await this.prisma.user.updateMany(params);
         } catch (error) {
@@ -127,7 +127,7 @@ export class UserRepo {
         }
     }
 
-    async deleteMany(params: Prisma.UserDeleteManyArgs) {
+    async deleteMany(params: Prisma.UserDeleteManyArgs): Promise<Prisma.BatchPayload> {
         try {
             return await this.prisma.user.deleteMany(params);
         } catch (error) {
@@ -151,10 +151,10 @@ export class UserRepo {
         }
     }
 
-    async groupBy<T extends Prisma.UserGroupByArgs>(params: T) {
+    async groupBy<T extends Prisma.UserGroupByArgs>(params: T): Promise<any> {
         try {
-            // @ts-expect-error - Prisma's groupBy has strict typing; T is validated by the generic constraint
-            return await this.prisma.user.groupBy(params);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            return await this.prisma.user.groupBy(params as any);
         } catch (error) {
             throw new RepositoryError(
                 'Failed to group users',

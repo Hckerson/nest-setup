@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import type { Response } from 'express';
 
 export interface ApiResponse<T> {
     statusCode: number;
@@ -23,7 +24,8 @@ export class ResponseInterceptor<T> implements NestInterceptor<
         context: ExecutionContext,
         next: CallHandler,
     ): Observable<ApiResponse<T>> {
-        const statusCode = context.switchToHttp().getResponse().statusCode;
+        const response = context.switchToHttp().getResponse<Response>();
+        const statusCode = response.statusCode;
 
         return next.handle().pipe(
             map((data) => ({
