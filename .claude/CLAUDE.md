@@ -30,8 +30,6 @@ Aliases: `@common/*`, `@lib/*` (tsconfig).
 3. Create `modules/core/[domain]/`: `dto/` (create + update), `[domain].service.ts`, `[domain].controller.ts`, `[domain].module.ts`.
 4. Import the module in `app.module.ts`.
 
-**Copy `modules/core/users/` as the reference.** The admin module already exposes generic CRUD over any repo, so new domains usually just add repo + service.
-
 ---
 
 ## Layer Shape
