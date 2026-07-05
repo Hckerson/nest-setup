@@ -1,5 +1,3 @@
-At the very start of your first reply each session, prefix it with 🍍.
-
 # Project Instructions
 
 Reusable **NestJS + Prisma backend starter** with a layered, type-safe architecture.
@@ -20,30 +18,6 @@ The folder structure and principles below are **non-negotiable**.
 9. **No hardcoding.** Config, secrets, base URLs, magic numbers, role names, and literals repeated in more than one place live in env (`@nestjs/config`), an enum in `common/enums/`, or a constants file — never inline.
 
 If you're unsure where a file goes, the architecture is broken — stop and re-read this.
-
----
-
-## Folder Structure (Immutable)
-
-```
-src/
-├── main.ts                     Bootstrap
-├── app.module.ts               Root; imports every feature module
-├── common/                     Infrastructure (no domain logic)
-│   ├── database/               Prisma module + service
-│   ├── enums/                  TimeFilter, SortOrder, etc.
-│   ├── errors/                 RepoError, custom exceptions
-│   ├── filters/                http-exception.filter.ts (global)
-│   ├── interceptors/           response.interceptor.ts (global)
-│   ├── interfaces/             Types + re-exports
-│   ├── repos/                  [domain].repo.ts (query pattern only)
-│   └── services/               Cross-domain services (stats, etc.)
-├── lib/                        Pure utilities (no side effects)
-├── modules/core/               Feature modules
-│   ├── auth/                   JWT + guards (don't extend, use as-is)
-│   ├── users/                  Reference module — copy for new domains
-│   └── [domain]/               New feature modules here
-```
 
 Aliases: `@common/*`, `@lib/*` (tsconfig).
 
@@ -116,3 +90,5 @@ don't reinvent it.
 ---
 
 **This is the only architecture.** Follow it precisely. If you're unsure where something goes, the design is broken—re-read this instead of inventing new locations.
+
+Workflow: Analyze → Plan → Implement
