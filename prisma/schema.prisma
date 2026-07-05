@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Used by the metric-builder / stats aggregation pattern to group records by period.
+enum Day {
+  MON
+  TUE
+  WED
+  THU
+  FRI
+  SAT
+  SUN
+}
+
+enum Month {
+  JAN
+  FEB
+  MAR
+  APR
+  MAY
+  JUN
+  JUL
+  AUG
+  SEP
+  OCT
+  NOV
+  DEC
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum UserAccountStatus {
+  ACTIVE
+  PENDING
+  SUSPENDED
+}
+
+model User {
+  id String @id @default(uuid())
+
+  fullName     String
+  email        String            @unique
+  passwordHash String
+  phoneNumber  String?
+  avatar       String?
+  bio          String?
+  year         Int
+  updatedAt    DateTime          @updatedAt
+  createdAt    DateTime          @default(now())
+  lastActive   DateTime?         @default(now())
+  // Period columns powering the stats grouping pattern
+  day          Day
+  month        Month
+  role         UserRole          @default(USER)
+  status       UserAccountStatus @default(ACTIVE)
+}

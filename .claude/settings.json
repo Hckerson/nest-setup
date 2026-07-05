@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run)",
+      "Bash(git status|log|diff)",
+      "Bash(npx prisma)",
+      "Bash(npx ts-node)",
+      "Glob(**/*.ts|**/*.tsx)",
+      "Grep(.)",
+      "Read(src/)",
+      "Edit(src/)"
+    ]
+  }
+}
