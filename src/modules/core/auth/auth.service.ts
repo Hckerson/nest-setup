@@ -1,8 +1,6 @@
 import { JwtService } from '@nestjs/jwt';
-import { Prisma, User } from 'generated/prisma/client';
-import { UserRole } from 'generated/prisma/enums';
+import { User, UserRole } from 'generated/prisma/client';
 import { PasswordUtil } from './utils/password.util';
-import { metricBuilder } from 'src/lib/metric-builder';
 import { UsersService } from '@core/users/users.service';
 import type { AuthResponse, JwtPayload } from './types/auth.types';
 import { LoginDto, RegisterDto, ResetPasswordDto, OnboardingDto } from './dto';
@@ -23,16 +21,7 @@ export class AuthService {
     // ─── Registration & Login ──────────────────────────────────────────────────
 
     async register(dto: RegisterDto): Promise<AuthResponse> {
-        const passwordHash = await PasswordUtil.hash(dto.password);
-        const data = metricBuilder<Prisma.UserCreateInput>({
-            passwordHash,
-            role: dto.role,
-            email: dto.email,
-            fullName: dto.fullName,
-            phoneNumber: dto.phoneNumber,
-        });
-
-        const user = await this.usersService.create(data);
+        const user = await this.usersService.create(dto);
         const accessToken = this.generateToken(user);
 
         return { user: this.toAuthUser(user), accessToken };

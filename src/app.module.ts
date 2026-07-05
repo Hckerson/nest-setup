@@ -4,7 +4,6 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AuthModule } from '@core/auth/auth.module';
 import { UsersModule } from '@core/users/users.module';
-import { AdminModule } from '@core/admin/admin.module';
 import { RepoModule } from '@common/repos/repo.module';
 import { PrismaModule } from '@common/database/prisma.module';
 
@@ -15,7 +14,6 @@ import { PrismaModule } from '@common/database/prisma.module';
         RepoModule,
         AuthModule,
         UsersModule,
-        AdminModule,
     ],
     controllers: [AppController],
     providers: [AppService],

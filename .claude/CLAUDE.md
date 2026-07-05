@@ -77,9 +77,9 @@ don't reinvent it.
 
 ## Pre-merge Checklist
 
-1. `npm run error` clean (`tsc --noEmit` — no type errors).
-2. `npm run lint` clean.
-3. `npm run build` succeeds.
+1. `pnpm type-check` clean (`tsc --noEmit` — no type errors).
+2. `pnpm lint` clean.
+3. `pnpm build` succeeds.
 4. No `any` in services, no `console.log`, no dead code or stubs.
 5. No hardcoded config, secrets, or magic values (Rule 9).
 6. Reused existing repos, guards, filters, and the global interceptor — didn't reinvent them.

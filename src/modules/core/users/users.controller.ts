@@ -16,8 +16,6 @@ import {
     Delete,
     UseGuards,
 } from '@nestjs/common';
-import { metricBuilder } from 'src/lib/metric-builder';
-import { Prisma } from 'generated/prisma/client';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -30,8 +28,7 @@ export class UsersController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @ApiOperation({ summary: 'Create a new user (Admin only)' })
     create(@Body() createUserDto: CreateUserDto) {
-        const data = metricBuilder<Prisma.UserCreateInput>(createUserDto);
-        return this.usersService.create(data);
+        return this.usersService.create(createUserDto);
     }
 
     @Get()
