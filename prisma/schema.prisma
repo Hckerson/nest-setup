@@ -11,6 +11,31 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Day {
+  MON
+  TUE
+  WED
+  THU
+  FRI
+  SAT
+  SUN
+}
+
+enum Month {
+  JAN
+  FEB
+  MAR
+  APR
+  MAY
+  JUN
+  JUL
+  AUG
+  SEP
+  OCT
+  NOV
+  DEC
+}
+
 enum UserRole {
   ADMIN
   USER
@@ -25,6 +50,8 @@ enum UserAccountStatus {
 model User {
   id String @id @default(uuid())
 
+  year Int
+
   fullName     String
   email        String            @unique
   passwordHash String
@@ -35,5 +62,7 @@ model User {
   createdAt    DateTime          @default(now())
   lastActive   DateTime?         @default(now())
   role         UserRole          @default(USER)
+  day          Day
+  month        Month
   status       UserAccountStatus @default(ACTIVE)
 }
