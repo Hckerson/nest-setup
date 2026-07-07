@@ -151,10 +151,11 @@ export class UserRepo {
         }
     }
 
-    async groupBy<T extends Prisma.UserGroupByArgs>(params: T): Promise<any> {
+    async groupBy(
+        params?: Prisma.UserGroupByArgs,
+    ): Promise<Prisma.UserGroupByOutputType[]> {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            return await this.prisma.user.groupBy(params as any);
+            return await this.prisma.user.groupBy(params);
         } catch (error) {
             throw new RepositoryError(
                 'Failed to group users',
