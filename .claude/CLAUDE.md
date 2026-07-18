@@ -63,15 +63,54 @@ This is a reusable **NestJS + Prisma backend starter** with a strict, layered, t
 - `common/interceptors/response.interceptor.ts` standardizes every success response: `{ status, data, message }`.
 - Never build ad-hoc response wrappers or swallow errors without the filter.
 
-## Pre-merge checklist
+## Development Workflow
 
-1. `pnpm type-check` clean (`tsc --noEmit` — no type errors).
-2. `pnpm lint` clean.
-3. `pnpm build` succeeds.
-4. No `any` in services, no `console.log`, no dead code or stubs.
-5. No hardcoded config, secrets, or magic values (all in env, enums, or constants).
-6. Reused existing repos, guards, filters, and the global interceptor. Nothing reinvented.
-7. Followed the layer contracts. Matched the `users` module pattern exactly.
+### Claude's Development Responsibilities
+
+After writing code, I run these checks before committing:
+
+```bash
+pnpm type-check  # tsc --noEmit
+pnpm lint        # ESLint with auto-fix
+pnpm build       # Verify build succeeds
+```
+
+All must pass before I stage changes. I also verify:
+- No `any` types in services — use DTOs for type source
+- No `console.log` statements
+- No dead code or stubs
+- Layers follow strict rules: Controller → Service → Repository → Prisma (never skip layers)
+- All config and magic values in env, `common/enums/`, or constants
+
+This is the first gate—I catch errors before they reach version control.
+
+### Automated Commit Gates (Husky)
+
+**Pre-commit hook:** Runs `pnpm type-check` and `pnpm lint` on staged files.
+- Blocks commits with type errors or lint violations
+- Fix locally and retry `git commit`
+
+**Pre-push hook:** Runs full type check, lint, and build on the branch.
+- Blocks pushes that fail
+- Fix and retry `git push`
+
+### Pre-Merge Checklist
+
+Before merging to `main`, verify:
+
+**Automated checks already passed:**
+- ✓ Type check clean
+- ✓ Lint clean
+- ✓ Build succeeded
+
+**Manual verification:**
+- [ ] Layer contracts honored (Controller → Service → Repo only)
+- [ ] No hardcoded config — all in env or `common/enums/`
+- [ ] Reused existing repos, guards, filters, and the global interceptor
+- [ ] DTOs used as type source (not ad-hoc interfaces)
+- [ ] Followed the `users` module pattern exactly
+
+**Do not merge if any check fails.**
 
 **Tech stack:** NestJS · Prisma + PostgreSQL · class-validator / class-transformer · @nestjs/jwt + passport · @nestjs/swagger · Jest. Auth logic is in `modules/core/auth/` — extend it, never reinvent.
 

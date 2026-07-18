@@ -1,10 +1,5 @@
 {
   "compilerOptions": {
-    "paths": {
-      "@core/*": ["src/modules/core/*"],
-      "@common/*": ["src/common/*"],
-      "@prisma-db/*": ["src/common/database/*"]
-    },
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "resolvePackageJsonExports": true,
