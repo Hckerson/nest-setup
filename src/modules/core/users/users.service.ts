@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UserRepo } from '@common/repos/user.repo';
 import { Prisma, User } from 'generated/prisma/client';
 import { PasswordUtil } from '@core/auth/utils/password.util';
+import { calendarParts } from '@lib/calendar';
 import { CreateUserDto } from './dto';
 
 @Injectable()
@@ -11,7 +12,9 @@ export class UsersService {
     async create(dto: CreateUserDto): Promise<User> {
         const { password, ...rest } = dto;
         const passwordHash = await PasswordUtil.hash(password);
-        return this.userRepo.create({ data: { ...rest, passwordHash } });
+        return this.userRepo.create({
+            data: { ...rest, passwordHash, ...calendarParts(new Date()) },
+        });
     }
 
     async findAll(): Promise<User[]> {

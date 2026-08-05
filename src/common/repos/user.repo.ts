@@ -8,12 +8,10 @@ export class UserRepo {
     constructor(private prisma: PrismaService) {}
 
     async findUnique<T extends Prisma.UserFindUniqueArgs>(
-        params: T,
-    ): Promise<Prisma.UserGetPayload<T>> {
+        params: Prisma.SelectSubset<T, Prisma.UserFindUniqueArgs>,
+    ) {
         try {
-            return (await this.prisma.user.findUnique(
-                params,
-            )) as Prisma.UserGetPayload<T>;
+            return await this.prisma.user.findUnique(params);
         } catch (error) {
             throw new RepositoryError(
                 'Failed to find unique user',
@@ -24,12 +22,10 @@ export class UserRepo {
     }
 
     async findFirst<T extends Prisma.UserFindFirstArgs>(
-        params: T,
-    ): Promise<Prisma.UserGetPayload<T>> {
+        params: Prisma.SelectSubset<T, Prisma.UserFindFirstArgs>,
+    ) {
         try {
-            return (await this.prisma.user.findFirst(
-                params,
-            )) as Prisma.UserGetPayload<T>;
+            return await this.prisma.user.findFirst(params);
         } catch (error) {
             throw new RepositoryError(
                 'Failed to find first user',
@@ -40,12 +36,10 @@ export class UserRepo {
     }
 
     async findMany<T extends Prisma.UserFindManyArgs>(
-        params: T,
-    ): Promise<Prisma.UserGetPayload<T>[]> {
+        params: Prisma.SelectSubset<T, Prisma.UserFindManyArgs>,
+    ) {
         try {
-            return (await this.prisma.user.findMany(
-                params,
-            )) as Prisma.UserGetPayload<T>[];
+            return await this.prisma.user.findMany(params);
         } catch (error) {
             throw new RepositoryError(
                 'Failed to find users',
@@ -56,12 +50,10 @@ export class UserRepo {
     }
 
     async create<T extends Prisma.UserCreateArgs>(
-        params: T,
-    ): Promise<Prisma.UserGetPayload<T>> {
+        params: Prisma.SelectSubset<T, Prisma.UserCreateArgs>,
+    ) {
         try {
-            return (await this.prisma.user.create(
-                params,
-            )) as Prisma.UserGetPayload<T>;
+            return await this.prisma.user.create(params);
         } catch (error) {
             throw new RepositoryError(
                 'Failed to create user',
@@ -71,7 +63,9 @@ export class UserRepo {
         }
     }
 
-    async createMany(params: Prisma.UserCreateManyArgs): Promise<Prisma.BatchPayload> {
+    async createMany(
+        params: Prisma.UserCreateManyArgs,
+    ): Promise<Prisma.BatchPayload> {
         try {
             return await this.prisma.user.createMany(params);
         } catch (error) {
@@ -84,12 +78,10 @@ export class UserRepo {
     }
 
     async update<T extends Prisma.UserUpdateArgs>(
-        params: T,
-    ): Promise<Prisma.UserGetPayload<T>> {
+        params: Prisma.SelectSubset<T, Prisma.UserUpdateArgs>,
+    ) {
         try {
-            return (await this.prisma.user.update(
-                params,
-            )) as Prisma.UserGetPayload<T>;
+            return await this.prisma.user.update(params);
         } catch (error) {
             throw new RepositoryError(
                 'Failed to update user',
@@ -99,7 +91,9 @@ export class UserRepo {
         }
     }
 
-    async updateMany(params: Prisma.UserUpdateManyArgs): Promise<Prisma.BatchPayload> {
+    async updateMany(
+        params: Prisma.UserUpdateManyArgs,
+    ): Promise<Prisma.BatchPayload> {
         try {
             return await this.prisma.user.updateMany(params);
         } catch (error) {
@@ -112,12 +106,10 @@ export class UserRepo {
     }
 
     async delete<T extends Prisma.UserDeleteArgs>(
-        params: T,
-    ): Promise<Prisma.UserGetPayload<T>> {
+        params: Prisma.SelectSubset<T, Prisma.UserDeleteArgs>,
+    ) {
         try {
-            return (await this.prisma.user.delete(
-                params,
-            )) as Prisma.UserGetPayload<T>;
+            return await this.prisma.user.delete(params);
         } catch (error) {
             throw new RepositoryError(
                 'Failed to delete user',
@@ -127,7 +119,9 @@ export class UserRepo {
         }
     }
 
-    async deleteMany(params: Prisma.UserDeleteManyArgs): Promise<Prisma.BatchPayload> {
+    async deleteMany(
+        params: Prisma.UserDeleteManyArgs,
+    ): Promise<Prisma.BatchPayload> {
         try {
             return await this.prisma.user.deleteMany(params);
         } catch (error) {
@@ -152,10 +146,15 @@ export class UserRepo {
     }
 
     async groupBy(
-        params?: Prisma.UserGroupByArgs,
-    ): Promise<Prisma.UserGroupByOutputType[]> {
+        field: Prisma.UserScalarFieldEnum,
+        where: Prisma.UserWhereInput,
+    ) {
         try {
-            return await this.prisma.user.groupBy(params);
+            return await this.prisma.user.groupBy({
+                by: [field],
+                where,
+                _count: { _all: true },
+            });
         } catch (error) {
             throw new RepositoryError(
                 'Failed to group users',
