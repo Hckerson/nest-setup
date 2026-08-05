@@ -1,14 +1,15 @@
 import { AppModule } from './app.module';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
+import { API_PREFIX, swaggerConfig } from './openapi';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
 
-    app.setGlobalPrefix('api');
+    app.setGlobalPrefix(API_PREFIX);
 
     app.enableCors({
         origin: process.env.FRONTEND_URL || 'http://localhost:3000',
@@ -25,13 +26,6 @@ async function bootstrap() {
 
     app.useGlobalFilters(new HttpExceptionFilter());
     app.useGlobalInterceptors(new ResponseInterceptor());
-
-    const swaggerConfig = new DocumentBuilder()
-        .setTitle('API')
-        .setDescription('Backend REST API documentation')
-        .setVersion('1.0')
-        .addBearerAuth()
-        .build();
 
     const document = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup('api/docs', app, document);
