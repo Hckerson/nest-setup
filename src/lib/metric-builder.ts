@@ -11,7 +11,7 @@ export const metricBuilder = <
         year: today.getFullYear(),
         day: dayConverter(today.getDay()),
         month: monthConverter(today.getMonth()),
-    } as T & { year: number; month: Month; day: Day };
+    };
 };
 
 const monthConverter = (number: number): Month => {
