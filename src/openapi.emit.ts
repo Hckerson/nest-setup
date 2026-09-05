@@ -1,12 +1,29 @@
 import { writeFileSync } from 'node:fs';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
-import { AppModule } from './app.module';
 import { API_PREFIX, swaggerConfig } from './openapi';
 
 const OUTPUT_PATH = 'openapi.json';
 
+const PREVIEW_PLACEHOLDER = 'contract-preview';
+
+const SECRETS_UNUSED_IN_PREVIEW = [
+    'DATABASE_URL',
+    'JWT_PRIVATE_KEY',
+    'JWT_PUBLIC_KEY',
+];
+
+const standInForSecretsPreviewNeverReads = () => {
+    for (const key of SECRETS_UNUSED_IN_PREVIEW) {
+        process.env[key] ??= PREVIEW_PLACEHOLDER;
+    }
+};
+
 async function emit() {
+    standInForSecretsPreviewNeverReads();
+
+    const { AppModule } = await import('./app.module.js');
+
     const app = await NestFactory.create(AppModule, {
         preview: true,
         logger: false,
