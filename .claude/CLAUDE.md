@@ -99,7 +99,9 @@ This repo is the **origin of the API contract**. DTOs carry `@ApiProperty`, and 
 
 The Next.js starter generates its Zod schemas, types, and route builders from that file, so **a DTO field rename is a breaking change to the frontend build**. Re-run `pnpm openapi` whenever a DTO, controller route, or `@ApiProperty` changes, and commit the regenerated `openapi.json`.
 
-The emitter runs from compiled output on purpose — esbuild-based runners (`tsx`) do not emit `design:paramtypes`, so Swagger silently drops every request body. It boots in preview mode, so contract generation needs neither a database nor secrets. Booting the app for real does: copy `.env.example` to `.env` first, or `AuthModule` aborts on the missing `JWT_SECRET`.
+The emitter runs from compiled output on purpose — esbuild-based runners (`tsx`) do not emit `design:paramtypes`, so Swagger silently drops every request body. It boots in preview mode, so contract generation needs neither a database nor secrets — it stands in placeholders for the values preview never reads. Booting the app for real does need them: copy `.env.example` to `.env` and run `pnpm keys:generate` first, or `validateEnv` aborts on the missing `JWT_PRIVATE_KEY` / `JWT_PUBLIC_KEY`.
+
+Signing is **RS256**. This service holds `JWT_PRIVATE_KEY` and signs; every other tier gets `JWT_PUBLIC_KEY` and can only verify. `pnpm keys:generate` prints a fresh pair as the `.env` lines each tier needs. Rotating them signs every existing session out, which is the intent. `jwt-keys.spec.ts` asserts the split holds, including that the public key cannot sign.
 
 ## Workflow: Add a new domain
 
@@ -125,13 +127,14 @@ The emitter runs from compiled output on purpose — esbuild-based runners (`tsx
 
 ## Before you commit or push
 
-These commands run at the commit or push boundary only — not after every edit.
+Formatting and linting are automated. They are not chores you run by hand.
 
-1. `pnpm format` — Prettier owns formatting. Never override it by hand.
-2. `pnpm lint` — zero warnings. Fix every violation; never suppress one.
-3. `pnpm type-check` — strict, zero errors.
-4. `pnpm build` — must succeed.
-5. `pnpm openapi` — if any DTO, route, or `@ApiProperty` changed, regenerate and commit `openapi.json`.
+- **Commit** — Husky's `pre-commit` hook runs `pnpm lint-staged` and nothing else: `eslint --fix` then `prettier --write`, over staged files only. It is fast by design.
+- **Push** — Husky's `pre-push` hook runs `pnpm type-check`, then `pnpm lint`, and blocks on failure. This is the real gate.
+- **Build** — `pnpm build` must succeed. That one is on you.
+- **OpenAPI** — if any DTO, route, or `@ApiProperty` changed, run `pnpm openapi` and commit `openapi.json`.
+
+`pnpm format` and `pnpm lint` stay available for a manual full-repo sweep, but no workflow requires you to run them.
 
 ## Pre-merge checklist
 
