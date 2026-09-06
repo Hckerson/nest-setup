@@ -7,13 +7,9 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { Response } from 'express';
+import { ApiEnvelopeDto } from '@common/dto';
 
-export interface ApiResponse<T> {
-    statusCode: number;
-    message: string;
-    data: T;
-    timestamp: string;
-}
+export type ApiResponse<T> = ApiEnvelopeDto & { data: T };
 
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<
