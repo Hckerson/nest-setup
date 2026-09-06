@@ -31,22 +31,14 @@ export class StatsService {
 
         const [userCount, userStats] = await Promise.all([
             this.userRepo.count(),
-            this.userRepo.groupBy({
-                by: [actualFilter],
-                where: {
-                    createdAt: {
-                        gte: startDate,
-                    },
-                },
-                _count: {
-                    _all: true,
-                },
+            this.userRepo.groupBy(actualFilter, {
+                createdAt: { gte: startDate },
             }),
         ]);
 
         const userData = userStats.map((stat) => ({
             name: actualFilter === TimeFilter.DAY ? stat.day : stat.month,
-            value: stat?._count || 0,
+            value: stat._count._all,
         }));
 
         const dataKey =

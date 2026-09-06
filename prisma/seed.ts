@@ -2,6 +2,7 @@ import 'dotenv/config';
 import * as bcrypt from 'bcrypt';
 import { faker } from '@faker-js/faker';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { calendarParts } from '../src/lib/calendar';
 import {
     Prisma,
     UserRole,
@@ -36,6 +37,7 @@ function buildUser(overrides: Partial<Prisma.UserCreateInput>) {
         role: UserRole.USER,
         status: faker.helpers.enumValue(UserAccountStatus),
         lastActive: faker.date.recent(),
+        ...calendarParts(new Date()),
         ...overrides,
     } satisfies Prisma.UserCreateInput;
 }
