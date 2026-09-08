@@ -14,6 +14,7 @@ import {
     LoginDto,
     RegisterDto,
     OnboardingDto,
+    AuthResponseDto,
     ResetPasswordDto,
     ForgotPasswordDto,
 } from './dto';
@@ -23,7 +24,12 @@ import {
     ApiOperation,
     ApiBearerAuth,
 } from '@nestjs/swagger';
+import { MessageResponseDto } from '@common/dto';
+import { ApiEnvelope } from '@common/decorators/api-envelope.decorator';
 import type { RequestWithUser } from '@common/interfaces/req';
+
+const RESET_INSTRUCTIONS_SENT =
+    'If the email exists, reset instructions were sent.';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -32,11 +38,7 @@ export class AuthController {
 
     @Post('register')
     @ApiOperation({ summary: 'Register a new user' })
-    @ApiResponse({
-        status: 201,
-        description:
-            'User successfully registered. Returns user + accessToken.',
-    })
+    @ApiEnvelope(AuthResponseDto, { status: 201 })
     @ApiResponse({ status: 409, description: 'User already exists' })
     async register(@Body() dto: RegisterDto) {
         return this.authService.register(dto);
@@ -45,39 +47,35 @@ export class AuthController {
     @Post('login')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Login and get JWT token' })
-    @ApiResponse({ status: 200, description: 'Login successful' })
+    @ApiEnvelope(AuthResponseDto)
     @ApiResponse({ status: 401, description: 'Invalid credentials' })
     async login(@Body() dto: LoginDto) {
         return this.authService.login(dto);
     }
 
-    // ─── Password Management ──────────────────────────────────────────────────
-
     @Post('forgot-password')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Request a password reset' })
+    @ApiEnvelope(MessageResponseDto)
     forgotPassword(@Body() dto: ForgotPasswordDto) {
         void dto;
-        // Wire up your email provider here to deliver a reset token.
-        return {
-            message: 'If the email exists, reset instructions were sent.',
-        };
+        return { message: RESET_INSTRUCTIONS_SENT };
     }
 
     @Post('reset-password')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Reset password' })
+    @ApiEnvelope(MessageResponseDto)
     async resetPassword(@Body() dto: ResetPasswordDto) {
         return this.authService.resetPassword(dto);
     }
-
-    // ─── Onboarding ──────────────────────────────────────────────────────────
 
     @Post('onboarding')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Complete profile onboarding' })
+    @ApiEnvelope(MessageResponseDto)
     async onboarding(
         @Body() dto: OnboardingDto,
         @Request() req: RequestWithUser,

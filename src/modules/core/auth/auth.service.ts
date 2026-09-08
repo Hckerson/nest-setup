@@ -1,5 +1,5 @@
 import { JwtService } from '@nestjs/jwt';
-import { User, UserRole } from 'generated/prisma/client';
+import { UserRole } from 'generated/prisma/client';
 import { PasswordUtil } from './utils/password.util';
 import { UsersService } from '@core/users/users.service';
 import type { AuthResponse, JwtPayload } from './types/auth.types';
@@ -18,8 +18,6 @@ export class AuthService {
         private readonly usersService: UsersService,
     ) {}
 
-    // ─── Registration & Login ──────────────────────────────────────────────────
-
     async register(dto: RegisterDto): Promise<AuthResponse> {
         const user = await this.usersService.create(dto);
         const accessToken = this.generateToken(user);
@@ -33,8 +31,6 @@ export class AuthService {
 
         return { user: this.toAuthUser(user), accessToken };
     }
-
-    // ─── Password & Profile ─────────────────────────────────────────────────────
 
     async resetPassword(dto: ResetPasswordDto): Promise<{ message: string }> {
         try {
@@ -64,9 +60,12 @@ export class AuthService {
         return { message: 'Onboarding completed.' };
     }
 
-    // ─── Helpers ────────────────────────────────────────────────────────────────
-
-    private toAuthUser(user: User) {
+    private toAuthUser(user: {
+        id: string;
+        fullName: string;
+        email: string;
+        role: UserRole;
+    }) {
         return {
             id: user.id,
             name: user.fullName,
