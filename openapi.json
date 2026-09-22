@@ -582,12 +582,8 @@
           },
           "password": {
             "type": "string",
-            "example": "password123"
-          },
-          "role": {
-            "type": "string",
-            "enum": ["ADMIN", "USER"],
-            "default": "USER"
+            "example": "password123",
+            "minLength": 8
           },
           "phoneNumber": {
             "type": "string",
@@ -684,7 +680,8 @@
           },
           "password": {
             "type": "string",
-            "example": "password123"
+            "example": "password123",
+            "minLength": 8
           },
           "role": {
             "type": "string",
@@ -715,7 +712,8 @@
           },
           "password": {
             "type": "string",
-            "example": "password123"
+            "example": "password123",
+            "minLength": 8
           },
           "role": {
             "type": "string",
