@@ -1,18 +1,6 @@
 {
   "openapi": "3.0.0",
   "paths": {
-    "/api": {
-      "get": {
-        "operationId": "AppController_getHello",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": ["App"]
-      }
-    },
     "/api/auth/register": {
       "post": {
         "operationId": "AuthController_register",
@@ -102,140 +90,6 @@
           }
         },
         "summary": "Login and get JWT token",
-        "tags": ["auth"]
-      }
-    },
-    "/api/auth/forgot-password": {
-      "post": {
-        "operationId": "AuthController_forgotPassword",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ForgotPasswordDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiEnvelopeDto"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/MessageResponseDto"
-                        }
-                      },
-                      "required": ["data"]
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "summary": "Request a password reset",
-        "tags": ["auth"]
-      }
-    },
-    "/api/auth/reset-password": {
-      "post": {
-        "operationId": "AuthController_resetPassword",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ResetPasswordDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiEnvelopeDto"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/MessageResponseDto"
-                        }
-                      },
-                      "required": ["data"]
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "summary": "Reset password",
-        "tags": ["auth"]
-      }
-    },
-    "/api/auth/onboarding": {
-      "post": {
-        "operationId": "AuthController_onboarding",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OnboardingDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiEnvelopeDto"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/MessageResponseDto"
-                        }
-                      },
-                      "required": ["data"]
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Complete profile onboarding",
         "tags": ["auth"]
       }
     },
@@ -510,6 +364,145 @@
         "summary": "Delete user (Admin only)",
         "tags": ["users"]
       }
+    },
+    "/api/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiEnvelopeDto"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/HealthResponseDto"
+                        }
+                      },
+                      "required": ["data"]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "Report that the API is up",
+        "tags": ["health"]
+      }
+    },
+    "/api/stats/users/total": {
+      "get": {
+        "operationId": "StatsController_usersTotal",
+        "parameters": [
+          {
+            "name": "period",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["day", "month", "year"]
+            }
+          },
+          {
+            "name": "date",
+            "required": false,
+            "in": "query",
+            "description": "Any instant inside the period. Defaults to now.",
+            "schema": {
+              "example": "2026-09-22",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiEnvelopeDto"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PeriodTotalResponseDto"
+                        }
+                      },
+                      "required": ["data"]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Users created in one day, month or year (Admin only)",
+        "tags": ["stats"]
+      }
+    },
+    "/api/stats/users/series": {
+      "get": {
+        "operationId": "StatsController_usersSeries",
+        "parameters": [
+          {
+            "name": "period",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["day", "month", "year"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiEnvelopeDto"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PeriodSeriesResponseDto"
+                        }
+                      },
+                      "required": ["data"]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Users created per day, month or year up to the current one (Admin only)",
+        "tags": ["stats"]
+      }
     }
   },
   "info": {
@@ -616,52 +609,6 @@
           }
         },
         "required": ["email", "password"]
-      },
-      "MessageResponseDto": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "string"
-          }
-        },
-        "required": ["message"]
-      },
-      "ForgotPasswordDto": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "example": "john@example.com"
-          }
-        },
-        "required": ["email"]
-      },
-      "ResetPasswordDto": {
-        "type": "object",
-        "properties": {
-          "password": {
-            "type": "string",
-            "example": "newpassword123"
-          },
-          "token": {
-            "type": "string",
-            "example": "reset-token-abc"
-          }
-        },
-        "required": ["password", "token"]
-      },
-      "OnboardingDto": {
-        "type": "object",
-        "properties": {
-          "phoneNumber": {
-            "type": "string",
-            "example": "+1234567890"
-          },
-          "bio": {
-            "type": "string",
-            "example": "Short profile bio"
-          }
-        }
       },
       "UserResponseDto": {
         "type": "object",
@@ -788,6 +735,74 @@
             "enum": ["ACTIVE", "PENDING", "SUSPENDED"]
           }
         }
+      },
+      "HealthResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["ok"]
+          }
+        },
+        "required": ["status"]
+      },
+      "PeriodTotalResponseDto": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "enum": ["day", "month", "year"]
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": ["period", "start", "end", "total"]
+      },
+      "SeriesPointDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "2026-09"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "required": ["key", "value"]
+      },
+      "PeriodSeriesResponseDto": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "enum": ["day", "month", "year"]
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeriesPointDto"
+            }
+          }
+        },
+        "required": ["period", "start", "end", "points"]
       }
     }
   }
