@@ -2,7 +2,6 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UsersService } from '@core/users/users.service';
-import { PrismaService } from '@common/database/prisma.service';
 import type { AuthUser, JwtPayload } from '../types/auth.types';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JWT_ALGORITHM, publicKeyFrom } from '@common/config/jwt-keys';
@@ -12,7 +11,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(
         configService: ConfigService,
         private readonly usersService: UsersService,
-        private readonly prisma: PrismaService,
     ) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

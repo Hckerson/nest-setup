@@ -1,35 +1,8 @@
-import { JwtAuthGuard } from './guards';
 import { AuthService } from './auth.service';
-
-import {
-    Post,
-    Body,
-    Request,
-    HttpCode,
-    UseGuards,
-    Controller,
-    HttpStatus,
-} from '@nestjs/common';
-import {
-    LoginDto,
-    RegisterDto,
-    OnboardingDto,
-    AuthResponseDto,
-    ResetPasswordDto,
-    ForgotPasswordDto,
-} from './dto';
-import {
-    ApiTags,
-    ApiResponse,
-    ApiOperation,
-    ApiBearerAuth,
-} from '@nestjs/swagger';
-import { MessageResponseDto } from '@common/dto';
+import { LoginDto, RegisterDto, AuthResponseDto } from './dto';
+import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
+import { Post, Body, HttpCode, Controller, HttpStatus } from '@nestjs/common';
 import { ApiEnvelope } from '@common/decorators/api-envelope.decorator';
-import type { RequestWithUser } from '@common/interfaces/req';
-
-const RESET_INSTRUCTIONS_SENT =
-    'If the email exists, reset instructions were sent.';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -51,35 +24,5 @@ export class AuthController {
     @ApiResponse({ status: 401, description: 'Invalid credentials' })
     async login(@Body() dto: LoginDto) {
         return this.authService.login(dto);
-    }
-
-    @Post('forgot-password')
-    @HttpCode(HttpStatus.OK)
-    @ApiOperation({ summary: 'Request a password reset' })
-    @ApiEnvelope(MessageResponseDto)
-    forgotPassword(@Body() dto: ForgotPasswordDto) {
-        void dto;
-        return { message: RESET_INSTRUCTIONS_SENT };
-    }
-
-    @Post('reset-password')
-    @HttpCode(HttpStatus.OK)
-    @ApiOperation({ summary: 'Reset password' })
-    @ApiEnvelope(MessageResponseDto)
-    async resetPassword(@Body() dto: ResetPasswordDto) {
-        return this.authService.resetPassword(dto);
-    }
-
-    @Post('onboarding')
-    @UseGuards(JwtAuthGuard)
-    @ApiBearerAuth()
-    @HttpCode(HttpStatus.OK)
-    @ApiOperation({ summary: 'Complete profile onboarding' })
-    @ApiEnvelope(MessageResponseDto)
-    async onboarding(
-        @Body() dto: OnboardingDto,
-        @Request() req: RequestWithUser,
-    ) {
-        return this.authService.onboarding(req.user.id, dto);
     }
 }

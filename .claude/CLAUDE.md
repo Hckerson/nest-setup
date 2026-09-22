@@ -86,10 +86,10 @@ Never replace a derived artifact with `any`, `Record<>`, `as` assertions, or han
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | `/src/common/`            | Shared infrastructure: repos, filters, guards, errors, enums, decorators, middleware.                                                |
 | `/src/common/repos/`      | Data access layer. One `[domain].repo.ts` per entity. Prisma only. **Repos = thin wrappers around Prisma's 10 native methods only.** |
-| `/src/common/errors/`     | Error definitions and error filter.                                                                                                  |
+| `/src/common/errors/`     | Error definitions (`RepoError`). The filter that shapes them lives in `common/filters/`.                                             |
 | `/src/common/enums/`      | Constants and enums. Single source of truth.                                                                                         |
 | `/src/common/decorators/` | Custom decorators (auth, roles, etc.).                                                                                               |
-| `/src/lib/`               | Pure utility functions and helpers. No NestJS dependencies.                                                                          |
+| `/src/lib/`               | Pure utility functions and helpers. No NestJS dependencies. `period.ts` owns day/month/year boundaries.                              |
 | `/src/modules/core/`      | Domain-specific modules. One folder per domain with `dto/`, `*.service.ts`, `*.controller.ts`, `*.module.ts`.                        |
 | `/src/modules/core/auth/` | Authentication logic. Already implemented. Extend, don't reinvent.                                                                   |
 
@@ -102,6 +102,15 @@ The Next.js starter generates its Zod schemas, types, and route builders from th
 The emitter runs from compiled output on purpose — esbuild-based runners (`tsx`) do not emit `design:paramtypes`, so Swagger silently drops every request body. It boots in preview mode, so contract generation needs neither a database nor secrets — it stands in placeholders for the values preview never reads. Booting the app for real does need them: copy `.env.example` to `.env` and run `pnpm keys:generate` first, or `validateEnv` aborts on the missing `JWT_PRIVATE_KEY` / `JWT_PUBLIC_KEY`.
 
 Signing is **RS256**. This service holds `JWT_PRIVATE_KEY` and signs; every other tier gets `JWT_PUBLIC_KEY` and can only verify. `pnpm keys:generate` prints a fresh pair as the `.env` lines each tier needs. Rotating them signs every existing session out, which is the intent. `jwt-keys.spec.ts` asserts the split holds, including that the public key cannot sign.
+
+## Time-bucketed stats
+
+Derive every day / month / year figure from the row's `createdAt` through `@lib/period` — never store calendar parts (`year`, `month`, `day`) on a model. `modules/core/stats/` is the reference:
+
+- **Total** — `periodRange(period, date)` gives one period, `start` inclusive, `end` exclusive (the next period's start). Filter with `{ gte: start, lt: end }` and `count`.
+- **Series** — `periodSeries(period, SERIES_LENGTH[period], now)` gives bar-aligned bounds plus every bucket key; `findMany` selecting `createdAt` only, then `countByKey` zero-fills the gaps.
+
+Buckets are UTC. Index any model's `createdAt` it is bucketed on.
 
 ## Workflow: Add a new domain
 
