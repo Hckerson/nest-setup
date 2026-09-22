@@ -1,7 +1,7 @@
 {
-  "name": "setup-2",
+  "name": "nest-setup",
   "version": "0.0.1",
-  "description": "",
+  "description": "NestJS + Prisma API starter with a layered architecture and a published OpenAPI contract.",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
@@ -21,7 +21,9 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "prisma generate",
+    "db:seed": "prisma db seed"
   },
   "lint-staged": {
     "*.ts": [
@@ -64,6 +66,7 @@
     "@types/node": "^24.0.0",
     "@types/passport-jwt": "^4.0.1",
     "@types/supertest": "^7.0.0",
+    "dotenv": "^18.0.2",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
@@ -94,7 +97,9 @@
     "moduleNameMapper": {
       "^@common/(.*)$": "<rootDir>/common/$1",
       "^@core/(.*)$": "<rootDir>/modules/core/$1",
-      "^@lib/(.*)$": "<rootDir>/lib/$1"
+      "^@lib/(.*)$": "<rootDir>/lib/$1",
+      "^generated/(.*)$": "<rootDir>/../generated/$1",
+      "^(\\.{1,2}/.*)\\.js$": "$1"
     },
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
