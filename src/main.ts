@@ -1,18 +1,22 @@
 import { AppModule } from './app.module';
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { SwaggerModule } from '@nestjs/swagger';
-import { API_PREFIX, swaggerConfig } from './openapi';
+import { Logger, ValidationPipe } from '@nestjs/common';
+import { API_PREFIX, DOCS_PATH, swaggerConfig } from './openapi';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
+const logger = new Logger('Bootstrap');
+
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
+    const config = app.get(ConfigService);
 
     app.setGlobalPrefix(API_PREFIX);
 
     app.enableCors({
-        origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+        origin: config.getOrThrow<string>('FRONTEND_URL'),
         credentials: true,
     });
 
@@ -28,15 +32,17 @@ async function bootstrap() {
     app.useGlobalInterceptors(new ResponseInterceptor());
 
     const document = SwaggerModule.createDocument(app, swaggerConfig);
-    SwaggerModule.setup('api/docs', app, document);
+    SwaggerModule.setup(DOCS_PATH, app, document);
 
-    const port = process.env.PORT ?? 5000;
+    const port = config.getOrThrow<number>('PORT');
     await app.listen(port);
-    console.log(`🚀 API running on http://localhost:${port}/api`);
-    console.log(`📚 Swagger docs at http://localhost:${port}/api/docs`);
+
+    const url = await app.getUrl();
+    logger.log(`API running on ${url}/${API_PREFIX}`);
+    logger.log(`Swagger docs at ${url}/${DOCS_PATH}`);
 }
 
-void bootstrap().catch((err) => {
-    console.error('Failed to start application:', err);
+void bootstrap().catch((err: unknown) => {
+    logger.error('Failed to start application', err);
     process.exit(1);
 });
