@@ -8,7 +8,7 @@ export interface JwtPayload {
 
 export interface AuthResponseUser {
     id: string;
-    name: string; // fullName alias
+    name: string;
     email: string;
     role: string;
 }

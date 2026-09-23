@@ -34,4 +34,4 @@ yarn.lock
 Thumbs.db
 
 # Prisma
-prisma/generated/
+generated/
