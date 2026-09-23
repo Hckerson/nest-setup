@@ -1,6 +1,6 @@
 import { HttpException } from '@nestjs/common';
 
-export class RepositoryError extends HttpException {
+export class RepoError extends HttpException {
     constructor(message: string, errorCode: number, cause?: unknown) {
         super(message, errorCode, { cause });
     }

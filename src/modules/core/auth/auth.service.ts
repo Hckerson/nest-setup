@@ -3,13 +3,8 @@ import { UserRole } from 'generated/prisma/client';
 import { PasswordUtil } from './utils/password.util';
 import { UsersService } from '@core/users/users.service';
 import type { AuthResponse, JwtPayload } from './types/auth.types';
-import { LoginDto, RegisterDto, ResetPasswordDto, OnboardingDto } from './dto';
-
-import {
-    Injectable,
-    NotFoundException,
-    UnauthorizedException,
-} from '@nestjs/common';
+import { LoginDto, RegisterDto } from './dto';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
@@ -30,34 +25,6 @@ export class AuthService {
         const accessToken = this.generateToken(user);
 
         return { user: this.toAuthUser(user), accessToken };
-    }
-
-    async resetPassword(dto: ResetPasswordDto): Promise<{ message: string }> {
-        try {
-            const payload: JwtPayload = this.jwtService.verify(dto.token);
-            const user = await this.usersService.findByEmail(payload.email);
-            if (!user) throw new UnauthorizedException('Invalid token');
-
-            const passwordHash = await PasswordUtil.hash(dto.password);
-            await this.usersService.update(user.id, { passwordHash });
-            return { message: 'Password reset successful.' };
-        } catch {
-            throw new UnauthorizedException('Invalid or expired token.');
-        }
-    }
-
-    async onboarding(
-        userId: string,
-        dto: OnboardingDto,
-    ): Promise<{ message: string }> {
-        const user = await this.usersService.findOne(userId);
-        if (!user) throw new NotFoundException('User not found');
-
-        await this.usersService.update(userId, {
-            bio: dto.bio,
-            phoneNumber: dto.phoneNumber,
-        });
-        return { message: 'Onboarding completed.' };
     }
 
     private toAuthUser(user: {
