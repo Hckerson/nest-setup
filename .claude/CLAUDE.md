@@ -10,16 +10,9 @@ This is a reusable **NestJS + Prisma backend starter** with a strict, layered, t
 4. **Services never return raw Prisma models.** Always return domain/response objects. Transform at the boundary.
 5. **Single source of truth.** Models in `schema.prisma`, validation in DTOs, errors in `common/errors/`, auth in `modules/core/auth/`, enums in `common/enums/`. No duplication anywhere.
 6. **Use the framework.** Prisma (not raw SQL), class-validator (not custom validators), Nest guards (not custom middleware), global interceptor (not ad-hoc wrappers). Don't hand-roll what Nest provides.
-7. **No `any` in services.** Strict types everywhere. DTOs are the type source. Prisma generates the rest.
-8. **No hardcoding.** Config, secrets, base URLs, magic numbers, role names, repeated literals — all live in env (`@nestjs/config`), `common/enums/`, or a constants file. Never inline.
-9. **No dead code, stubs, or placeholders.** Delete unused code.
-10. **No comments in code.** Ever. Code reads clearly on its own — when it doesn't, the abstraction is wrong. Fix the abstraction. Machine-read directives that change behavior (pragmas, codegen markers) are not comments; suppressions are governed by rule 11.
-11. **No inline type/lint rule suppression without explicit approval.** Never use `// @ts-expect-error`, `// @ts-ignore`, `// eslint-disable`, `as any`, `as unknown`, or similar. Each suppression masks a design problem or framework limitation that must be visible. **If a rule conflicts with your implementation:**
-    - State the exact reason and the framework constraint involved in your response — not in a code comment
-    - Get explicit approval before committing it
-    - This violation fails the pre-merge checklist
-    - **Examples of suppressions that need approval:** require imports for non-ESM packages, type assertions when Prisma inference fails, unsafe member access on third-party `any` types
-12. **No `console.log` or debug statements** in committed code. Use the Nest logger.
+7. **No hardcoding.** Config, secrets, base URLs, magic numbers, role names, repeated literals — all live in env (`@nestjs/config`), `common/enums/`, or a constants file. Never inline.
+8. **No dead code, stubs, or placeholders.** Delete unused code.
+9. **No `console.log` or debug statements** in committed code. Use the Nest logger.
 
 **Absolute imports via `@common/*` and `@lib/*`.** Never deep-relative (`../../../common/...`).
 
@@ -57,29 +50,6 @@ Never replace a derived artifact with `any`, `Record<>`, `as` assertions, or han
 
 **Repositories are ONLY thin wrappers around Prisma's 10 native methods.** No custom domain methods.
 
-### ✅ Allowed repo methods (and ONLY these):
-
-- `findUnique(params: T)` → `Prisma.[Model]GetPayload<T> | null`
-- `findFirst(params: T)` → `Prisma.[Model]GetPayload<T> | null`
-- `findMany(params: T)` → `Prisma.[Model]GetPayload<T>[]`
-- `create(params: T)` → `Prisma.[Model]GetPayload<T>`
-- `createMany(params)` → `Prisma.BatchPayload`
-- `update(params: T)` → `Prisma.[Model]GetPayload<T>`
-- `updateMany(params)` → `Prisma.BatchPayload`
-- `delete(params: T)` → `Prisma.[Model]GetPayload<T>`
-- `deleteMany(params)` → `Prisma.BatchPayload`
-- `count(params?)` → `number`
-- `groupBy(field, where)` → aggregation rows. **The one method that may not be a generic pass-through:** Prisma's `InputErrors` type only collapses at a literal call site, so a `groupBy<T>(params: T)` wrapper cannot type-check without a suppression. Take the grouping field and filter as plain arguments and build the args object inside the repo.
-
-### ❌ Forbidden (move to Service if needed):
-
-- `findByResourceId()`, `findByActorId()`, `search()`, `findRecent()` — these are NOT Prisma methods
-- `getStatistics()`, `getUserActivitySummary()`, `export()` — business logic, belongs in Service
-- `findSensitiveActions()`, `findByDateRange()`, `findChanges()` — filtering & composition belong in Service
-- Any method that applies domain logic, filtering beyond the params, or aggregation
-
----
-
 ## Folder Structure
 
 | Route                     | Purpose                                                                                                                              |
@@ -93,47 +63,6 @@ Never replace a derived artifact with `any`, `Record<>`, `as` assertions, or han
 | `/src/modules/core/`      | Domain-specific modules. One folder per domain with `dto/`, `*.service.ts`, `*.controller.ts`, `*.module.ts`.                        |
 | `/src/modules/core/auth/` | Authentication logic. Already implemented. Extend, don't reinvent.                                                                   |
 
-## The published contract
-
-This repo is the **origin of the API contract**. DTOs carry `@ApiProperty`, and `pnpm openapi` compiles the project and writes `openapi.json` from the Swagger document (`src/openapi.ts` holds the shared config used by both `main.ts` and `src/openapi.emit.ts`).
-
-The Next.js starter generates its Zod schemas, types, and route builders from that file, so **a DTO field rename is a breaking change to the frontend build**. Re-run `pnpm openapi` whenever a DTO, controller route, or `@ApiProperty` changes, and commit the regenerated `openapi.json`.
-
-The emitter runs from compiled output on purpose — esbuild-based runners (`tsx`) do not emit `design:paramtypes`, so Swagger silently drops every request body. It boots in preview mode, so contract generation needs neither a database nor secrets — it stands in placeholders for the values preview never reads. Booting the app for real does need them: copy `.env.example` to `.env` and run `pnpm keys:generate` first, or `validateEnv` aborts on the missing `JWT_PRIVATE_KEY` / `JWT_PUBLIC_KEY`.
-
-Signing is **RS256**. This service holds `JWT_PRIVATE_KEY` and signs; every other tier gets `JWT_PUBLIC_KEY` and can only verify. `pnpm keys:generate` prints a fresh pair as the `.env` lines each tier needs. Rotating them signs every existing session out, which is the intent. `jwt-keys.spec.ts` asserts the split holds, including that the public key cannot sign.
-
-## Time-bucketed stats
-
-Derive every day / month / year figure from the row's `createdAt` through `@lib/period` — never store calendar parts (`year`, `month`, `day`) on a model. `modules/core/stats/` is the reference:
-
-- **Total** — `periodRange(period, date)` gives one period, `start` inclusive, `end` exclusive (the next period's start). Filter with `{ gte: start, lt: end }` and `count`.
-- **Series** — `periodSeries(period, SERIES_LENGTH[period], now)` gives bar-aligned bounds plus every bucket key; `findMany` selecting `createdAt` only, then `countByKey` zero-fills the gaps.
-
-Buckets are UTC. Index any model's `createdAt` it is bucketed on.
-
-## Workflow: Add a new domain
-
-1. Add model to `schema.prisma` → run `prisma migrate dev --name <name>`.
-2. Create `common/repos/[domain].repo.ts` (Prisma queries) → register in `repo.module.ts`.
-3. Create `modules/core/[domain]/`: `dto/` (create + update), `[domain].service.ts`, `[domain].controller.ts`, `[domain].module.ts`.
-4. Import the module in `app.module.ts`.
-
----
-
-## File rules
-
-- **Kebab-case filenames matching the export:** `user.service.ts` → `UserService`, `create-user.dto.ts` → `CreateUserDto`.
-- **Co-locate by domain** under `modules/core/<domain>/`. Shared infra stays in `common/`. Pure helpers in `lib/`.
-- **Add packages with `pnpm add`.** Never hand-edit `package.json`.
-
-## Error & response handling
-
-- Throw typed errors anywhere: Nest exceptions in services, `RepoError` in repos.
-- `common/filters/http-exception.filter.ts` transforms every error into standard HTTP shape.
-- `common/interceptors/response.interceptor.ts` standardizes every success response: `{ status, data, message }`.
-- Never build ad-hoc response wrappers or swallow errors without the filter.
-
 ## Before you commit or push
 
 Formatting and linting are automated. They are not chores you run by hand.
@@ -146,14 +75,10 @@ Formatting and linting are automated. They are not chores you run by hand.
 
 ## Pre-merge checklist
 
-1. No `any` in services, no `console.log`, no dead code or stubs.
-2. No comments in code. No inline type/lint rule suppressions (`// @ts-ignore`, `// eslint-disable`, `as any`, etc.).
+1. No `console.log`, no dead code or stubs.
+2. No inline type/lint rule suppressions (`// @ts-ignore`, `// eslint-disable`, `as any`, etc.).
 3. No hardcoded config, secrets, or magic values (all in env, enums, or constants).
 4. Reused existing repos, guards, filters, and the global interceptor. Nothing reinvented.
 5. Followed the layer contracts. Repos stayed thin. Matched the `users` module pattern exactly.
 
 **Do not merge if any check fails.**
-
-**Tech stack:** NestJS · Prisma + PostgreSQL · class-validator / class-transformer · @nestjs/jwt + passport · @nestjs/swagger · Jest. Auth logic is in `modules/core/auth/` — extend it, never reinvent.
-
-Workflow: Analyze → Plan → Implement
