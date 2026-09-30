@@ -1,5 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { UserRepo } from '@common/repos/user.repo';
+import { USER_EXISTS } from '@common/enums/auth';
+import { UNIQUE_VIOLATION } from '@common/enums/prisma';
 import { Prisma, User } from 'generated/prisma/client';
 import { PasswordUtil } from '@core/auth/utils/password.util';
 import { CreateUserDto, UserResponse, userSelect } from './dto';
@@ -11,10 +13,17 @@ export class UsersService {
     async create(dto: CreateUserDto): Promise<UserResponse> {
         const { password, ...rest } = dto;
         const passwordHash = await PasswordUtil.hash(password);
-        return this.userRepo.create({
-            data: { ...rest, passwordHash },
-            select: userSelect,
-        });
+        return this.userRepo
+            .create({ data: { ...rest, passwordHash }, select: userSelect })
+            .catch((error: unknown) => {
+                if (
+                    error instanceof Prisma.PrismaClientKnownRequestError &&
+                    error.code === UNIQUE_VIOLATION
+                ) {
+                    throw new ConflictException(USER_EXISTS);
+                }
+                throw error;
+            });
     }
 
     async findAll(): Promise<UserResponse[]> {
