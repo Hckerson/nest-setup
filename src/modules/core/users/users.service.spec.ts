@@ -171,7 +171,9 @@ describe('UsersService.update', () => {
 
     it('answers 404 for a user that does not exist', async () => {
         const service = await serviceWith({
-            update: jest.fn().mockRejectedValue(prismaFailure(RECORD_NOT_FOUND)),
+            update: jest
+                .fn()
+                .mockRejectedValue(prismaFailure(RECORD_NOT_FOUND)),
         });
 
         await expect(
@@ -181,7 +183,9 @@ describe('UsersService.update', () => {
 
     it('answers 409 when the new email is taken', async () => {
         const service = await serviceWith({
-            update: jest.fn().mockRejectedValue(prismaFailure(UNIQUE_VIOLATION)),
+            update: jest
+                .fn()
+                .mockRejectedValue(prismaFailure(UNIQUE_VIOLATION)),
         });
 
         await expect(
@@ -193,7 +197,9 @@ describe('UsersService.update', () => {
 describe('UsersService.remove', () => {
     it('answers 404 for a user that does not exist', async () => {
         const service = await serviceWith({
-            delete: jest.fn().mockRejectedValue(prismaFailure(RECORD_NOT_FOUND)),
+            delete: jest
+                .fn()
+                .mockRejectedValue(prismaFailure(RECORD_NOT_FOUND)),
         });
 
         await expect(service.remove('usr_2')).rejects.toBeInstanceOf(
