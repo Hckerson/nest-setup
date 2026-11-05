@@ -46,7 +46,7 @@ Invariants:
 | `ts-loader`          | dev   | `remove`   | none — `nest-cli.json` does not enable webpack                                    | high       |
 | `ts-node`            | dev   | `remove`   | `test:debug` preload — dropped by Phase 1                                         | high       |
 | `tsconfig-paths`     | dev   | `remove`   | `test:debug` preload — dropped by Phase 1                                         | high       |
-| `source-map-support` | dev   | `optional` | none in repo; `nest start` preloads it when installed (Nest CLI, not verified here) | medium     |
+| `source-map-support` | dev   | `remove`   | none — Nest CLI 11 passes `--enable-source-maps` to every `nest start` itself      | high       |
 
 **Ledger — kept with no direct import**, recorded so they are not flagged again:
 
@@ -159,7 +159,7 @@ Exit Criteria: all pass and `openapi.json` is byte-identical.
 | R1 — pnpm exits non-zero on ignored build scripts (seen in next-setup), so a good step looks failed | Judge each phase by the `package.json` and lockfile diff, never the exit code               |
 | R2 — `husky` removed while `prepare` still calls it, so `pnpm install` fails               | Both leave in the same commit (Phase 3)                                                        |
 | R3 — someone turns on webpack builds later                                                 | `ts-loader` comes back with `"webpack": true`; say so in the Phase 2 commit message           |
-| R4 — removing `source-map-support` degrades `nest start` stack traces                      | It stays until D1 is decided                                                                   |
+| R4 — removing `source-map-support` degrades `nest start` stack traces                      | Does not happen: Nest CLI 11 passes `--enable-source-maps` itself (`actions/start.action.js`)  |
 | R5 — other clones keep `core.hooksPath=.husky/_`                                           | Harmless (git finds no hooks there); the self-healing `prepare` clears it                     |
 | R6 — the new `test:debug` path is wrong                                                    | After install, confirm `node_modules/jest/package.json` › `bin.jest` is `./bin/jest.js` (Phase 5) |
 | R7 — docs drift again                                                                      | Phase 4 exit criterion greps for the removed tools                                             |
@@ -168,10 +168,12 @@ Exit Criteria: all pass and `openapi.json` is byte-identical.
 
 **Recommendation:** ship Phases 0–4 as one PR into `development`, four commits, then run Phase 5 once you approve the checks.
 
-**Open decisions:**
+**Decisions (resolved 2026-11-05):**
 
-1. **D1 — `source-map-support`:** keep it, or swap for Node's `--enable-source-maps`?
-2. **D2 — `prepare`:** delete it, or replace it with next-setup's self-healing version?
-3. **D3 — Swagger UI:** keep the `/docs` page, or remove it? It is the only UI in nest-setup.
-4. **D4 — next-setup leftovers from the UI strip:** stale `.claude/CLAUDE.md` and `README.md` sections, `proxy.ts` redirecting to the deleted `/auth/login`, `MOTION_*` constants, hooks with no consumers, `nanoid` with no importer. In this refactor, or separate?
-5. **D5 — next-setup's uncommitted changes** (UI files, layout tokens, five packages): commit them on `development` before this starts?
+1. **D1 — `source-map-support`:** removed. Nest CLI 11 already starts Node with `--enable-source-maps`, so nothing replaces it.
+2. **D2 — `prepare`:** replaced with next-setup's `git config --unset-all core.hooksPath || exit 0`, so old clones drop the husky hooks path on install.
+3. **D3 — Swagger UI:** kept.
+4. **D4 — next-setup leftovers:** handled separately in next-setup; the stale docs are fixed, the rest waits for a new UI.
+5. **D5 — next-setup's changes:** committed on `development` before this started.
+
+pnpm build scripts are approved in `pnpm-workspace.yaml` › `allowBuilds`: Prisma, `bcrypt`, `esbuild` and `unrs-resolver` run; `@scarf/scarf` (install analytics) does not.
