@@ -1,6 +1,6 @@
 # Starter Dependency Cleanup — nest-setup
 
-`Phases 0–4 applied` · Phase 5 awaiting approval · 2026-11-05 · branch `chore/starter-dependency-cleanup` off `development`
+`Phases 0–5 done` · e2e blocked on local `.env` (database URL, JWT keys) · 2026-11-05 · branch `chore/starter-dependency-cleanup` off `development`
 
 ## 1. Thesis
 
