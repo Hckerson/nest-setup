@@ -1,6 +1,6 @@
 # Starter Dependency Cleanup — nest-setup
 
-`Proposed` · 2026-11-05 · base branch `development`
+`Phases 0–4 applied` · Phase 5 awaiting approval · 2026-11-05 · branch `chore/starter-dependency-cleanup` off `development`
 
 ## 1. Thesis
 
