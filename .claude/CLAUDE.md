@@ -65,13 +65,10 @@ Never replace a derived artifact with `any`, `Record<>`, `as` assertions, or han
 
 ## Before you commit or push
 
-Formatting and linting are automated. They are not chores you run by hand.
+No git hooks are installed. Nothing runs on commit or push, so the gate is manual:
 
-- **Commit** — Husky's `pre-commit` hook runs `pnpm lint-staged` and nothing else: `eslint --fix` then `prettier --write`, over staged files only. It is fast by design.
-- **Push** — Husky's `pre-push` hook runs `pnpm type-check`, then `pnpm lint`, and blocks on failure. This is the real gate.
+- **Gate** — `pnpm type-check`, then `pnpm lint`. `pnpm format` rewrites `src/` and `test/` with Prettier.
 - **OpenAPI** — if any DTO, route, or `@ApiProperty` changed, run `pnpm openapi` and commit `openapi.json`.
-
-`pnpm format` and `pnpm lint` stay available for a manual full-repo sweep, but no workflow requires you to run them.
 
 ## Pre-merge checklist
 
